@@ -36,12 +36,12 @@ A.2_vector
 
 #Gene Ontology Cluster F 
 
-GO<- gconvert(query = c(gene_vector), organism = "hsapiens", 
+F <- gconvert(query = c(gene_vector), organism = "hsapiens", 
               target="ENSG", mthreshold = Inf, filter_na = TRUE)
 
-GO
+F
 
-View(GO)
+View(F)
 
 
 #Gene Ontology Cluster A.2
@@ -51,4 +51,69 @@ A.2 <- gconvert(query = c(A.2_vector), organism = "hsapiens",
 A.2
 
 
+
+View(F)
+View(A.2)
+
+
+#Create dataframe that contains only gene names and function for each cluster
+F_subset <- subset(F, select= c("name", "description"))
+F_subset
+
+A.2_subset <- subset(A.2, select= c("name", "description"))
+A.2_subset
+
+
+library(dplyr)
+
+
+mergedDf <- F_subset %>% full_join(A.2_subset)
+
+mergedDf
+
+View(mergedDf)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#More Gene Ontology 
+
+GO_A.2 <- gost(query = c(A.2), 
+                organism = "hsapiens", ordered_query = FALSE, 
+                multi_query = FALSE, significant = TRUE, exclude_iea = FALSE, 
+                measure_underrepresentation = FALSE, evcodes = TRUE, 
+                user_threshold = 0.05, correction_method = "g_SCS", 
+                domain_scope = "annotated", custom_bg = NULL, 
+                numeric_ns = "", sources = NULL)
+
+class(GO_A.2)
+
+GO_A.2
+
+
+GO_F <- gost(query = c(genes), 
+                 organism = "hsapiens", ordered_query = FALSE, 
+                 multi_query = FALSE, significant = TRUE, exclude_iea = FALSE, 
+                 measure_underrepresentation = FALSE, evcodes = TRUE, 
+                 user_threshold = 0.05, correction_method = "g_SCS", 
+                 domain_scope = "annotated", custom_bg = NULL, 
+                 numeric_ns = "", sources = NULL)
+
+
+
+View(gostres2)
+
+gostplot(genes, capped = TRUE, interactive= TRUE)
+
+gostplot(A.2, capped= TRUE, interactive = TRUE )
 
