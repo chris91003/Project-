@@ -76,16 +76,6 @@ View(mergedDf)
 
 
 
-
-
-
-
-
-
-
-
-
-
 #More Gene Ontology 
 
 GO_A.2 <- gost(query = c(A.2), 
@@ -110,10 +100,12 @@ GO_F <- gost(query = c(genes),
                  numeric_ns = "", sources = NULL)
 
 
+#Manhattan plots of gene enrichment 
 
-View(gostres2)
+gostplot(GO_A.2, capped = TRUE, interactive= TRUE)
 
-gostplot(genes, capped = TRUE, interactive= TRUE)
+gostplot(GO_F, capped= TRUE, interactive = TRUE )
 
-gostplot(A.2, capped= TRUE, interactive = TRUE )
 
+#Manhattan plots of both gene clusters
+gostplot(GO_A.2, GO_F, capped = TRUE, interactive = TRUE)
