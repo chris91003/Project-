@@ -1,3 +1,6 @@
+#Script to generate gene ontology terms for gene cluster columns 
+
+
 install.packages("gprofiler2")
 library(gprofiler2)
 
@@ -36,31 +39,29 @@ A.2_vector
 
 #Gene Ontology Cluster F 
 
-F <- gconvert(query = c(gene_vector), organism = "hsapiens", 
+cluster_F <- gconvert(query = c(gene_vector), organism = "hsapiens", 
               target="ENSG", mthreshold = Inf, filter_na = TRUE)
 
-F
+cluster_F
 
-View(F)
+
 
 
 #Gene Ontology Cluster A.2
 
-A.2 <- gconvert(query = c(A.2_vector), organism = "hsapiens", 
+cluster_A.2 <- gconvert(query = c(A.2_vector), organism = "hsapiens", 
               target="ENSG", mthreshold = Inf, filter_na = TRUE)
-A.2
+cluster_A.2
 
 
 
-View(F)
-View(A.2)
 
 
 #Create dataframe that contains only gene names and function for each cluster
-F_subset <- subset(F, select= c("name", "description"))
+F_subset <- subset(cluster_F, select= c("name", "description"))
 F_subset
 
-A.2_subset <- subset(A.2, select= c("name", "description"))
+A.2_subset <- subset(cluster_A.2, select= c("name", "description"))
 A.2_subset
 
 
@@ -74,6 +75,10 @@ mergedDf
 View(mergedDf)
 
 
+#Check for identical values
+'''
+identical <- data.frame(mergedDf(table(mergedDf$description)))
+'''
 
 
 #More Gene Ontology 
@@ -86,9 +91,11 @@ GO_A.2 <- gost(query = c(A.2),
                 domain_scope = "annotated", custom_bg = NULL, 
                 numeric_ns = "", sources = NULL)
 
+
+ 
 class(GO_A.2)
 
-GO_A.2
+View(GO_A.2)
 
 
 GO_F <- gost(query = c(genes), 
@@ -102,10 +109,20 @@ GO_F <- gost(query = c(genes),
 
 #Manhattan plots of gene enrichment 
 
-gostplot(GO_A.2, capped = TRUE, interactive= TRUE)
+A.2_plot <- gostplot(GO_A.2, capped = TRUE, interactive= TRUE)
 
-gostplot(GO_F, capped= TRUE, interactive = TRUE )
+F_plot <- gostplot(GO_F, capped= TRUE, interactive = TRUE)
 
 
 #Manhattan plots of both gene clusters
 gostplot(GO_A.2, GO_F, capped = TRUE, interactive = TRUE)
+
+
+
+
+#Tabular form to figure out what genes are driving these clusters?
+
+Ftable <- publish_gosttable(GO_F, use_colors = TRUE)
+Ftable
+
+
