@@ -26,7 +26,7 @@ str(df)
 View(df)
 describe(df)
 
-freq(df)
+
 
 #Exploratory data an analysis to learn more about the data
 
@@ -41,15 +41,6 @@ hist=for(col in 2:ncol(df)) {
 }
 
 
-
-#Remove dataframe column and create a heatmap
-new_df <- df[2:11]
-new_df
-
-corr= cor(new_df)
-
-num_df <- data.matrix(new_df)
-heatmap(num_df)
 
 # See if correlation is signficant and Graph Correlations 
 install.packages("Hmisc")
@@ -77,6 +68,13 @@ abline(lm(y~x), col="red")
 cor(new_df$A.1,new_df$A.2)
 
 
+#Boxplot of A1 and A2
+
+par(mfrow=c(1,2))
+boxplot(x, xlab= "Boxplot of A.1", ylab= "ZScore",col= "red")
+boxplot(y, xlab= "Boxplot of A.2", ylab= "ZScore",col= "blue")
+
+
 #Bar plot of A1 vs A2
 bar <- ggplot(data= new_df, aes(x= A.1, y= A.2, fill= x, y))+ 
   geom_bar(stat= "identity", width= 0.01)+
@@ -85,10 +83,6 @@ bar <- ggplot(data= new_df, aes(x= A.1, y= A.2, fill= x, y))+
 bar    
 
 
-box <- ggplot(data= new_df, aes(x= A.1, y= A.2))+
-  geom_boxplot()
-
-box
 
 #Finding highly correlated clusters
 max_corr <- which(abs(corr) > 0.5 , arr.ind = TRUE)
@@ -126,6 +120,14 @@ corr1
 #Maybe because these clusters have interactions with each other?
 
 
+#Remove dataframe column and create a heatmap
+new_df <- df[2:11]
+new_df
+
+corr= cor(new_df)
+
+num_df <- data.matrix(new_df)
+heatmap(num_df)
 
 
 
