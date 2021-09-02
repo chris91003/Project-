@@ -6,6 +6,7 @@
 df <- read.csv("kendall-liver-gene-clusters-high-variance.csv")
 df
 
+View(df)
 
 #Create empty vector that will contain gene cluster columns
 column_vector <- vector()
@@ -13,7 +14,7 @@ column_vector <- vector()
 #for loop to iterate through df and extract columns and convert to vector 
 
 for (i in 1:ncol(df)) {
-  vector <- subset(df, select = c[1]
+  vector <- c(column_vector, df)
+  print(vector)
+  }
 
-  column_vector[i] <-                    
-}
