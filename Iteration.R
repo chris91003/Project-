@@ -16,12 +16,57 @@ for(i in 1:length(df)) {
   column <- c(df, i)
 }
 
-
+class(column)
 
 #Now have list of vectors that can be inserted into Gprofiler
-cluster_A.2 <- gconvert(query = c(column$X), organism = "hsapiens", 
-                        target="ENSG", mthreshold = Inf, filter_na = TRUE)
-cluster_A.2
+GO_F <- gost(query = list("Column F"= c(column$F)), 
+             organism = "hsapiens", ordered_query = FALSE, 
+             multi_query = FALSE, significant = TRUE, exclude_iea = FALSE, 
+             measure_underrepresentation = FALSE, evcodes = TRUE, 
+             user_threshold = 0.05, correction_method = "g_SCS", 
+             domain_scope = "annotated", custom_bg = NULL, 
+             numeric_ns = "", sources = NULL)
+
+GO_F
+
+#Gprofiler Result Dataframe
+results <- GO_F$result
+class(results)
+View(results)
 
 
+
+#Dataframe Exploration
+
+
+
+
+
+
+
+
+
+
+
+
+#Tabular format of GO IDs and Intersecting Genes
+intersect<- data.frame("Go_ID"= c(results$term_id), 
+                        "Intersecting Genes"= c(results$intersection),
+                       "Description" = c(results$term_name))
+                       
+intersect
+
+View(intersect)
+
+
+
+
+
+
+#Generate Manhattan Plots 
+
+Ftable <- publish_gosttable(GO_F, use_colors = TRUE)
+Ftable
+
+GO_F$intersection
 
