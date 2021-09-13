@@ -192,23 +192,6 @@ A.2_Hplot
 
 
 
-library("biomaRt")
-
-# Select appropriate database
-ensembl <- useMart("ensembl")
-ensembl <- useDataset("hsapiens_gene_ensembl", mart=ensembl)
-
-# set up any filters and their appropriate values
-filters <- c("hgnc_symbol")
-gene <- c(A.1_list)
-values <- as.list(gene)
-
-# select attributes to return
-attributes <- c("hgnc_id", "namespace_1003", "name_1006", "go_id", "go_linkage_type", "definition_1006")
-
-# perform biomart query
-bio <- getBM(attributes=attributes, filters=filters, values=values, mart=ensembl)
-View(bio)
 
 
 
