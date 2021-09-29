@@ -1,6 +1,7 @@
 #T test to compare disease groups in phenotype list
 library(ggplot2)
 library(dplyr)
+library(ggthemes)
 
 #read data
 zscore <- read.csv("kendall-liver-cluster-profiles.csv")
@@ -37,9 +38,26 @@ join <- left_join(zscore, phenotype, by= "SUBJID")
 View(join)
 
 
+#Trying to obtain all columns with sum of >1 = 100 or more
+empty_list <- c()
+
+for (i in ncol(join)){
+  empty_list[i] <- sum(join[, i] == 1)
+  
+}
+
+empty_list
+
+library(dplyr)
+join %>%
+summarise_if(is.numeric, sum, na.rm= TRUE)
+
+
+
+
 
 #Explore Data
-
+join$
 
 
 
@@ -66,25 +84,15 @@ View(final_df)
 
 #Visualize data
 
-boxplot(final_df$ZScore~final_df$Hypertension)
+boxplot(join$ZScore~final_df$Hypertension)
 
-barplot <- ggplot(final_df, aes(x= Hypertension))+
-  geom_bar(fill= "orange") + xlab("Barplot of People with and without Hypertension")+
+barplot <- ggplot(join, aes(x= Hypertension))+
+  geom_bar(fill= "blue") + xlab("Barplot of People with and without Hypertension")+
   ylab("Number of People")
 
+barplot
 
 
-#Subset top 25% and bottom 25% of data
-
-top <- final_df[1:57, 1:3]
-View(top)
-
-hist(top$ZScore, main= "Zscore Distribution", xlab= "ZScores")
-
-
-bottom <- final_df[169:226 ,1:3]
-hist(bottom$ZScore, main= "Bottom Zscore Distribution", xlab= "ZScores")
-View(bottom)
 
 
 
@@ -93,14 +101,78 @@ View(bottom)
 #Ho = mean of top zscore/ hypertension population is equal to mean of zscore and hypertension
 #for bottom population
 
-test_top <- t.test(top$ZScore, top$Hypertension)
-test_top
+
+#Ttest smokers
+smokers <- ifelse(join$MHSMKSTS == "Yes", 1, 0)
+smokers
+smoke <- t.test(join$A.1, smokers)
+smoke
+smoke$p.value
 
 
-test_bottom <- t.test(bottom$ZScore, bottom$Hypertension)
-test_bottom
+t.test(join$A.1, smokers)$p.value
 
-# 95 percent confident that means lie between 0.256 and 0.5313890
+smoker_test <- t.test(join$A.1, smokers)
+smoker_test
+smoker_pval <- smoker_test$p.value
+smoker_pval
+
+#Hypertension
+hyp_df <- subset(join, join$MHHTN != "99")
+hyp_df
+
+#Hypertension
+hyp_df$MHHTN
+
+hyp_test <- t.test(join$A.1, hyp_df$MHHTN)
+hyp_test
+
+hyp_pval <- hyp_test$p.value
+hyp_pval
+
+#Ttest Pancreas Contamination and Hypertension
+
+contamination <- t.test(join$B,hyp_df$MHHTN)
+contamination
+
+contamination_pval <- contamination$p.value
+contamination_pval
+
+#table
+ne <- table(hyp_pval, contamination_pval, smoker_pval)
+new <- as.data.frame(ne)
+
+View(new)
+final <- subset(new, select= -c(Freq))
+final
+names(final) <- c("Hypertension/Drug Metabolizing Cluster", " Hypertension/Contamination Cluster", 
+                  "Smoker/Drug Metabolizing Cluster")
+final
+
+row.names(final)[1] <- "P-Value"
+final
+View(final)
+
+View(join)
+hyp_df$MHHTN
+
+#
+A.2_pval <- t.test(join$A.2, hyp_df$MHHTN)$p.value
+C_pval <- t.test(join$C, hyp_df$MHHTN)$p.value
+D_pval <- t.test(join$D, hyp_df$MHHTN)$p.value
+E_pval <- t.test(join$E, hyp_df$MHHTN)$p.value
+
+hyp_df$MHHTN
+
+y <- table(A.2_pval, C_pval, D_pval, E_pval)
+
+as.data.frame(y)
+View(as.data.frame(y))
+
+hist(join$A.1)
+hist(join$A.2)
+hist(join$B)
+
 
 
 #Wilcox Test (assume that distribution isn't normal)
@@ -111,6 +183,8 @@ wilcox_top
 wilcox_bottom <- wilcox.test(bottom$ZScore, bottom$Hypertension)
 
 hypertension_list <- c(test_top$p.value, test_bottom$p.value)
+hypertension_list
+
 
 wilcox_table <- table(wilcox_top$p.value, wilcox_bottom$p.value)
 wilcox_table
@@ -123,44 +197,140 @@ column
 
 
 
-
 #Liver Disease Analysis
 join$MHLVRDIS
-
-
 
 
 liver_disease <- data.frame("SUBJID"=join$SUBJID, 
                      "ZScore"= join$A.1, "Liver Disease"= join$MHLVRDIS)
 View(liver_disease)
 
+
+
 liver_disease_plot <- ggplot(liver_disease, aes(x= Liver.Disease))+
   geom_bar(fill= "orange") + xlab("Barplot of People with and without Liver Disease")+
   ylab("Number of People")
 
-liver_disease_plot
-
-top_liver <- liver_disease[1:57, 1:3]
-
-bottom_liver <-  liver_disease[169:226 ,1:3]
 
 
 
-liverdisease_test_top <- t.test(top_liver$ZScore, top_liver$Liver.Disease)
-liverdisease_test_top
+#T test showed correlations that shouldn't have worked. Maybe Regression Analysis
+#is better model?
 
-liverdisease_test_bottom <- t.test(bottom_liver$ZScore, bottom_liver
-                                   $Hypertension)
-liverdisease_test_bottom
-
-liverdisease_list <- c(liverdisease_test_top$p.value, liverdisease_test_bottom$p.value)
-liverdisease_list
+join$MHSMKSTS <- ifelse(join$MHSMKSTS == "Yes", 1, 0) 
 
 
-Pvalue_df <- data.frame(unlist(hypertension_list), unlist(liverdisease_list))
+#Basic Linear Model Between A.1 and Smokers
 
-names(Pvalue_df) <- c("P-value of Zscore/Hypertension", "P-value of 
-                      Zscore/Liver Disease")
-row.names(Pvalue_df)[1] <- "Top"
-row.names(Pvalue_df)[2] <- "Bottom"
-View(Pvalue_df)
+linear_smokers <- lm(join$MHSMKSTS~join$A.1, data= join)
+linear_smokers
+
+summary(linear)
+
+rsquared <- summary(linear_smokers)$r.squared
+
+R2 <- round(rsquared, digits =4)
+R2
+#Ggplot A.1 and Smoking  
+
+smoke_A.1plot <- ggplot(join ,aes(x= A.1, y= MHSMKSTS), xlab= "Liver Drug Metabolizing Cluster",
+       ylab= "Smokers vs NonSmokers") + geom_point() + geom_smooth(formula = y~x, method= "lm") +
+  theme_base() + annotate("text", x= 0.8, y= 1.2, label= paste0("R-Squared: ", R2))
+
+smoke_A.1plot+ labs(x= "A.1 Zscore", y= "Smoker vs NonSmoker")
+
+
+
+
+
+#Regular plot
+
+plot(x= join$A.1, y= join$MHSMKSTS, xlab= "Cluster A.1 Zscores", ylab=
+       "Smokers vs NonSmokers")
+
+abline(linear, col= "red")
+
+
+
+#Linear Model Hypertension
+
+
+
+linear_hypertension <- lm(join$MHHTN~join$A.1, data= join)
+
+
+summary(linear_hypertension)
+
+
+
+
+
+
+
+
+
+#Logistic Regression Analysis
+summary(join)
+
+#Convert to Factors
+
+join$MHSMKSTS <- ifelse(join$MHSMKSTS == "Yes", 1, 0)
+
+join$MHSMKSTS
+join$A.1 <- as.factor(join$A.1)
+
+#Visualize Data
+table(join$A.1, join$MHSMKSTS)
+plot(join$A.1, join$MHSMKSTS)
+cor(join$A.1, join$MHSMKSTS)
+
+
+#Simple Logistic Regression model
+
+logreg <- glm(join$MHSMKSTS~join$A.1, family= "binomial", data= join)
+
+logreg
+
+
+#Partition into Training and Test Set
+library(caret)
+
+set.seed(1234)
+
+train <- createDataPartition(join, p= .6, list= FALSE)
+
+
+
+#Multi Linear Regression Smokers, Age, A.1
+
+join
+
+Smoker_Age_A.1 <- lm(join$A.1~ join$MHSMKSTS+ join$AGE, data= join)
+
+
+summary(Smoker_Age_A.1)
+
+#Multi Linear Regression Model Hypertension, Smokers, A.1, Age
+
+join[join == 99] <- NA
+
+join$MHHTN <- replace(join$MHHTN, join$MHHTN == 99, NA)
+
+join$MHHTN
+
+join1
+
+join1[join1 == 99] <- NA
+
+
+which(is.na(join$MHHTN), arr.ind= TRUE)
+join1 <- join[!is.na(join$MHHTN), ]
+
+join1_mod <- join1[-c(123,213),]
+
+join1_mod$H
+
+
+A.1_Smoker_MHHTN<- lm(join1_mod$A.1~join1_mod$MHHTN+join1_mod$MHSMKSTS, data= join1_mod)
+summary(A.1_Smoker_MHHTN)
+
