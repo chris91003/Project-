@@ -2,7 +2,7 @@
 library(ggplot2)
 library(dplyr)
 library(ggthemes)
-
+setwd("/Users/cdima/OneDrive/Desktop/Project")
 #read data
 zscore <- read.csv("kendall-liver-cluster-profiles.csv")
 zscore
@@ -220,17 +220,21 @@ liver_disease_plot <- ggplot(liver_disease, aes(x= Liver.Disease))+
 join$MHSMKSTS <- ifelse(join$MHSMKSTS == "Yes", 1, 0) 
 
 
+
+
+
 #Basic Linear Model Between A.1 and Smokers
 
 linear_smokers <- lm(join$MHSMKSTS~join$A.1, data= join)
 linear_smokers
 
-summary(linear)
+summary(linear_smokers)
 
 rsquared <- summary(linear_smokers)$r.squared
 
 R2 <- round(rsquared, digits =4)
 R2
+
 #Ggplot A.1 and Smoking  
 
 smoke_A.1plot <- ggplot(join ,aes(x= A.1, y= MHSMKSTS), xlab= "Liver Drug Metabolizing Cluster",
@@ -241,6 +245,7 @@ smoke_A.1plot+ labs(x= "A.1 Zscore", y= "Smoker vs NonSmoker")
 
 
 
+summary(ln)
 
 
 #Regular plot
@@ -254,19 +259,31 @@ abline(linear, col= "red")
 
 #Linear Model Hypertension
 
-
+View(join)
 
 linear_hypertension <- lm(join$MHHTN~join$A.1, data= join)
 
 
 summary(linear_hypertension)
 
+join$MHHTN <- replace(join$MHHTN, join$MHHTN == 99, NA)
+
+join$MHHTN
+
+join$MHHTN <- factor(join$MHHTN)
+join$MHHTN
+
+model <- lm(join$A.1~join$MHHTN)
+summary(model)
 
 
+boxplot(A.1~ MHHTN, data= join)
 
+join$MHHTN
 
+summary(new_model)
 
-
+other <- lm(factor~join$A.1)
 
 
 #Logistic Regression Analysis
@@ -292,6 +309,8 @@ logreg <- glm(join$MHSMKSTS~join$A.1, family= "binomial", data= join)
 logreg
 
 
+summary(logreg)
+
 #Partition into Training and Test Set
 library(caret)
 
@@ -303,7 +322,8 @@ train <- createDataPartition(join, p= .6, list= FALSE)
 
 #Multi Linear Regression Smokers, Age, A.1
 
-join
+plot(join$A.1, join$AGE)
+
 
 Smoker_Age_A.1 <- lm(join$A.1~ join$MHSMKSTS+ join$AGE, data= join)
 
@@ -334,3 +354,106 @@ join1_mod$H
 A.1_Smoker_MHHTN<- lm(join1_mod$A.1~join1_mod$MHHTN+join1_mod$MHSMKSTS, data= join1_mod)
 summary(A.1_Smoker_MHHTN)
 
+
+#A2 Cluster Regression with Post-Mortom Interval time? (time person died to time of autopsy)
+
+
+
+
+#H Cluster maybe liver injury?
+
+
+
+
+#Liver Cluster T2D
+
+plot(join$A.1, join$MHT2D)
+
+diabetes <- lm(join$MHT2D~ join$A.1)
+
+summary(diabetes)
+rsquared <- summary(diabetes)$r.squared
+
+
+#Multi Regression Analysis
+
+diabetes_age <- lm(join$MHT2D~join$A.1+join$AGE)
+summary(diabetes_age)
+
+
+diabetes_age_weight <- lm(MHT2D~A.1+AGE+WGHT, data= join)
+summary(diabetes_age_weight)
+
+
+
+
+
+
+
+#library(car)
+
+
+avPlots(diabetes_age_weight)
+
+#plot(diabetes_age_weight)
+
+
+
+
+#HardyScale Analysis 0= ventilator case 1= fast/violent death 
+#2- fast natural death 3- intermediate death 4-slow death
+
+#Remove NA
+
+hardy <- join[!is.na(join$DTHHRDY),]
+
+boxplot(A.1~DTHHRDY, data= hardy)
+
+#Violin plot Hardy Score
+
+join$DTHHRDY <- as.factor(join$DTHHRDY)
+join$DTHHRDY
+
+hardy_plot <- ggplot(join, aes(x=DTHHRDY, y=A.1))+
+  geom_violin(aes(fill = DTHHRDY))+geom_boxplot(width=.3)
+  
+
+hardy_plot+geom_jitter()
+
+
+#Violin plot without the NA
+
+View(hardy)
+hardy$DTHHRDY <- as.factor(hardy$DTHHRDY)
+hardy1_plot <- ggplot(hardy, aes(x=DTHHRDY, y=A.1))+
+  geom_violin(aes(fill = DTHHRDY))+geom_boxplot(width=.2)+
+  labs(title = "Hardy Score and A.1 Cluster Comparison",
+       x= "Hardy Score", y= "Cluster Z-Score")
+
+
+hardy1_plot+geom_jitter()
+
+
+sum(hardy$DTHHRDY == 0)
+
+#Hardy Model A1 and A2
+
+join$DTHHRDY <- factor(join$DTHHRDY, levels = (1, 2, 3, 4, 0))
+join$DTHHRDY
+summary(lm(A.1~DTHHRDY, data= join))
+
+hardy_model <- lm(A.1~DTHHRDY, data= hardy)
+summary(hardy_model)
+
+
+plot(density(resid(hardy_model))
+qqnorm(resid(hardy_model))
+
+
+hardy_modelA.2 <- lm(A.2~DTHHRDY,data= hardy)
+summary(hardy_modelA.2)     
+
+hardy_model$coefficients
+
+
+cor(join$DTHHRDY, join$A.1, use = "complete.obs")
