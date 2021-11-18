@@ -98,7 +98,7 @@ class(GO_A.2)
 View(GO_A.2)
 
 
-GO_F <- gost(query = c(genes), 
+GO_F <- gost(query = c(gene_vector), 
                  organism = "hsapiens", ordered_query = FALSE, 
                  multi_query = FALSE, significant = TRUE, exclude_iea = FALSE, 
                  measure_underrepresentation = FALSE, evcodes = TRUE, 
@@ -106,6 +106,7 @@ GO_F <- gost(query = c(genes),
                  domain_scope = "annotated", custom_bg = NULL, 
                  numeric_ns = "", sources = NULL)
 
+class(GO_F)
 
 #Manhattan plots of gene enrichment 
 
@@ -124,5 +125,9 @@ gostplot(GO_A.2, GO_F, capped = TRUE, interactive = TRUE)
 
 Ftable <- publish_gosttable(GO_F, use_colors = TRUE)
 Ftable
+
+class(Ftable)
+
+GO_F
 
 

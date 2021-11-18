@@ -46,9 +46,10 @@ evcodes = TRUE)
 #Splitting Resulting Dataframe
 result <- GO$result
 
+
 result
 split1 <- split(result, f=result$query)
-split
+split1
 View(split1)
 
 #Iterate over list and extract individual dataframes
@@ -66,13 +67,28 @@ class(column$A.1)
 View(column$A.1)
 
 
-
-A.2 <- split$`Column A.2`
+A.2 <- split1$`Column A.2`
+View(A.2)
+split
 
 View(A.2)
 
-lapply(split, )
+B <- split1$`Column B`
+View(B)
 
+C <- split1$`Column C`
+
+
+D <- split1$`Column D`
+
+E <- split1$`Column E`
+View(E)
+
+F_ <- split1$`Column F`
+View(F)
+
+
+###### Iterate through the lists of GO terms and see if there are terms that constantly show up
 
 
 #Look at individual genes and where they are located 
@@ -634,7 +650,42 @@ for i in 1:length(split1)) {
 View(genstain)
 
 
+clus <- list()
+
+for (cluster_columns in seq(ncol(df))){
+  #Extract each column as individual column
+  clust_list <-  df[, cluster_columns] 
+  #input each column into HPA Stain R
+  stainr <- HPAStainR::HPAStainR(clust_list, hpa_dat = HPA_data$hpa_dat )
+  #Append each one
+  clus[[colnames(df)[cluster_columns]]] <- stainr
+  print(stainr)
+}  
+
+#Iterate through all columns 
+blank_list <- list()
+data <- df
+
+for (i in 1:ncol(df)) {
+  data[ ,i] <- df[,i]
+  data_matrix <- as.matrix(data)
+  stainer <- HPAStainR::HPAStainR(data_matrix[, i], hpa_dat = HPA_data$hpa_dat )
+  
+  
+}
+
+stainer$tested_proteins
+
+View(stainr)
+
+clust_list <- df[[cluster_columns]]
+clust_list
+
 #Maybe lapply
 lapply(df, function(x, HPAStainR::HPAStainR(split1[[i]], hpa_dat = HPA_data$hpa_dat) )
 
+for (cluster_columns in seq_along(df)){
+  clust_list <- df[[cluster_columns]]
+  stainr <- HPAStainR::HPAStainR(clust_list, hpa_dat = HPA_data$hpa_dat )
+}
   

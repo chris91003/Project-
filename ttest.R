@@ -355,12 +355,85 @@ A.1_Smoker_MHHTN<- lm(join1_mod$A.1~join1_mod$MHHTN+join1_mod$MHSMKSTS, data= jo
 summary(A.1_Smoker_MHHTN)
 
 
-#A2 Cluster Regression with Post-Mortom Interval time? (time person died to time of autopsy)
+
+
+#Remove NA from dataframe
+
+join[join == 99] <- NA
+
+#A2 Cluster Regression with Post-Mortom Interval time? (time person died to time of autopsy) (TRISCHD)
+
+hist(join$TRISCHD)
 
 
 
+summary(lm(join$A.2~join$TRISCHD))
+
+
+#Visualization of Ischemic Time, A.2 Cluster, and Hardy
+
+ggplot(join, aes(TRISCHD, A.2))+
+  geom_point()+geom_smooth(method= 'lm', se= FALSE)
+
+ggplot(join, aes(TRISCHD, A.2, color= DTHHRDY))+
+  geom_point()
+
+ggplot(join, aes(TRISCHD, A.2))+
+  geom_point()+
+  facet_wrap(~DTHHRDY, nrow = 1)
+
+
+cor(join$A.2, join$TRISCHD)
+
+
+#A.2 Cluster, Ischemic time, Hardy Model
+join$DTHHRDY <- as.factor(join$DTHHRDY)
+
+A.2_model <- lm(A.2~TRISCHD +DTHHRDY, data= join)
+
+
+#C Cluster and Ischemic Time
+
+ggplot(join, aes(TRISCHD, C))+geom_jitter()+geom_smooth(method= 'lm', se= FALSE)
+
+ggplot(join, aes(DTHHRDY, C)) +geom_jitter(width= 0.1)
+
+C_model <- lm(C~TRISCHD +DTHHRDY, data= join)
+
+cor(join$C,join$TRISCHD)
+
+
+
+#E cluster Contamination
+
+
+#F Cluster
+
+join$SEX <- as.factor(join$SEX)
+ggplot(join, aes(SEX, F))+geom_jitter(width= 0.1)
+
+
+#G cluster and hypertension (blood pressure)
+
+join$MHHTN <- as.factor(join$MHHTN)
+ggplot(join, aes(MHHTN, G)) +
+  geom_jitter(width= 0.1)
+
+
+join$MHCVD <- as.factor(join$MHCVD)
+ggplot(join, aes(	MHHTN, G)) + geom_jitter(width= 0.1)
 
 #H Cluster maybe liver injury?
+
+
+
+
+#I.2 cluster and sex
+join$SEX <- as.factor(join$SEX)
+
+
+ggplot(join, aes(SEX, I.2))+geom_jitter(width= 0.2, aes(color = SEX))
+
 
 
 
@@ -368,6 +441,8 @@ summary(A.1_Smoker_MHHTN)
 #Liver Cluster T2D
 
 plot(join$A.1, join$MHT2D)
+plot(join$MHT2D, join$A.1)
+
 
 diabetes <- lm(join$MHT2D~ join$A.1)
 
@@ -387,7 +462,7 @@ summary(diabetes_age_weight)
 
 
 
-
+summary(lm(join$A.1~join$MHT2D+join$AGE+join$WGHT))
 
 
 #library(car)
@@ -428,14 +503,24 @@ hardy$DTHHRDY <- as.factor(hardy$DTHHRDY)
 hardy1_plot <- ggplot(hardy, aes(x=DTHHRDY, y=A.1))+
   geom_violin(aes(fill = DTHHRDY))+geom_boxplot(width=.2)+
   labs(title = "Hardy Score and A.1 Cluster Comparison",
-       x= "Hardy Score", y= "Cluster Z-Score")
+       x= "Hardy Score", y= "Cluster Z-Score") +geom_jitter()
 
 
 hardy1_plot+geom_jitter()
 
 
-sum(hardy$DTHHRDY == 0)
+hardyA.2_plot <- ggplot(hardy, aes(x=DTHHRDY, y=A.2))+
+  geom_violin(aes(fill = DTHHRDY))+geom_boxplot(width=.2)+
+  labs(title = "Hardy Score and A.2 Cluster Comparison",
+       x= "Hardy Score", y= "Cluster Z-Score")+geom_jitter()
 
+
+hardyA.2_plot+geom_jitter()
+
+
+
+library(gridExtra)
+grid.arrange(hardy1_plot, hardyA.2_plot, nrow= 1)
 #Hardy Model A1 and A2
 
 join$DTHHRDY <- factor(join$DTHHRDY, levels = (1, 2, 3, 4, 0))
@@ -457,3 +542,18 @@ hardy_model$coefficients
 
 
 cor(join$DTHHRDY, join$A.1, use = "complete.obs")
+
+
+
+#Hardy Model C
+
+C_hardy <- ggplot(join) + aes(DTHHRDY, C) +
+  geom_jitter()
+
+D_hardy <- ggplot(join) + aes(DTHHRDY, D) +
+  geom_jitter()
+
+#Diabetes
+ggplot(join) + aes(MHT2D, A.2) +
+  geom_jitter()
+

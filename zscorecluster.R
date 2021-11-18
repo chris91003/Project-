@@ -17,9 +17,7 @@ library(ggplot2)
 
 getwd()
 df <- read.csv("kendall-liver-cluster-profiles.csv")
-print(df)
-head(df)
-str(df)
+phenotype <- read.csv("gtex_phenotypes_v8.csv")
 
 
 
@@ -42,12 +40,22 @@ hist=for(col in 2:ncol(df)) {
 
 
 
-# See if correlation is signficant and Graph Correlations 
+# See if correlation is significant and Graph Correlations 
 install.packages("Hmisc")
 library("Hmisc")
 
 corr_matrix <- rcorr(as.matrix(new_df))
 corr_matrix
+
+#Remove dataframe column and create a heatmap
+new_df <- df[2:12]
+new_df
+
+corr= cor(new_df)
+
+num_df <- data.matrix(new_df)
+heatmap(num_df)
+
 
 
 install.packages("corrplot")
@@ -63,7 +71,7 @@ corrplot(corr, method= "circle", addCoef.col = "black", title= "Correlation Matr
 
 x <- new_df$A.1
 y <- new_df$A.2
-plot(x,y, xlab= "A.1 Column Values", ylab= "A.2 Column Values")
+plot(x,y, xlab= "A.1 Zscore", ylab= "A.2 Zscore")
 abline(lm(y~x), col="red")
 cor(new_df$A.1,new_df$A.2)
 
@@ -81,6 +89,7 @@ bar <- ggplot(data= new_df, aes(x= A.1, y= A.2, fill= x, y))+
   coord_flip()
 
 bar    
+
 
 
 
@@ -120,34 +129,29 @@ corr1
 #Maybe because these clusters have interactions with each other?
 
 
-#Remove dataframe column and create a heatmap
-new_df <- df[2:11]
-new_df
 
-corr= cor(new_df)
+#Join zscore and phenotype data
 
-num_df <- data.matrix(new_df)
-heatmap(num_df)
+GTEx_SAMPID_to_SUBJID <- function(sampids){
+  ## A simple function to quickly turn SAMPIDs into SUBJIDs to connect
+  ## individuals to their phenotype
+  stringr::str_extract(string = sampids, pattern = "GTEX-[[:alnum:]]*")
+}
+
+zscore_SUBJID <- GTEx_SAMPID_to_SUBJID(df$X)
+zscore_SUBJID
+
+#Replace subject ID with new Subj ID and join
+df$X <- zscore_SUBJID
+
+#rename zscore data column
+names(df)[1] <- "SUBJID"
+join <- left_join(df, phenotype, by= "SUBJID")
+View(join)
+
+join$MHDRNKSTS <- ifelse(join$MHDRNKSTS == "Yes", 1, 0)
 
 
 
-'''
-
-index_matrix <- data.frame(index)
-index_matrix
-class(index_matrix)
-
-str(corr_max)
-head(corr_max)
-#Get maximum expression
-max <- new_df[new_df == max]
-max 
-
-max1 <- which.max[new_df]
-
-'''
-num2_df <- data.matrix(new_df)
-heatmap(num2_df)
-
-#Extracting values that are >3
-new_df[which(new_df[2:11] >3), ]
+ggplot(join) + aes(MHDRNKSTS, A.1) +
+  geom_jitter()
